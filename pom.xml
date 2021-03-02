@@ -63,12 +63,12 @@
         <!--dependencies -->
         <resteasy.version>3.14.0.Final</resteasy.version>
         <keycloak.version>9.0.2</keycloak.version>
-        <quarkus.version>1.2.0.Final</quarkus.version>
+        <quarkus.version>1.11.3.Final</quarkus.version>
         <jackson.version>2.12.0</jackson.version>
         <okhttp.version>3.12.1</okhttp.version>
         <jcabi.version>1.1</jcabi.version>
         <commons-lang.version>3.9</commons-lang.version>
-        <fabric8.version>4.7.0</fabric8.version>
+        <fabric8.version>5.0.2</fabric8.version>
         <prometheus.metrics.version>0.6.0</prometheus.metrics.version>
         <guava.version>30.1-jre</guava.version>
         <snakeyaml.version>1.27</snakeyaml.version>
@@ -88,6 +88,7 @@
         <httpclient.version>4.5.13</httpclient.version>
         <bcprov-jdk15on.version>1.68</bcprov-jdk15on.version>
         <junit-platform-launcher.version>1.7.0</junit-platform-launcher.version>
+        <log4j.version>2.14.0</log4j.version>
     </properties>
     <issueManagement>
         <system>Github</system>
@@ -286,11 +287,6 @@
                 <version>${slf4j.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-log4j12</artifactId>
-                <version>${slf4j.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.yaml</groupId>
                 <artifactId>snakeyaml</artifactId>
                 <version>${snakeyaml.version}</version>
@@ -342,7 +338,18 @@
                 <version>${mockito.version}</version>
                 <scope>test</scope>
             </dependency>
-
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-slf4j-impl</artifactId>
+                <version>${log4j.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-jul</artifactId>
+                <version>${log4j.version}</version>
+                <scope>test</scope>
+            </dependency>
 
         </dependencies>
     </dependencyManagement>
@@ -350,6 +357,42 @@
     <build>
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>${maven-surefire-plugin.version}</version>
+                    <configuration>
+                        <skip>${skipPreDeploymentTests}</skip>
+                        <forkCount>1</forkCount>
+                        <testFailureIgnore>${ignoreAllFailures}</testFailureIgnore>
+                        <groups>${preDeploymentTestGroups}</groups>
+                        <classpathDependencyExcludes>
+                            <classpathDependencyExclude>org.jboss.slf4j:slf4j-jboss-logmanager</classpathDependencyExclude>
+                        </classpathDependencyExcludes>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>${maven-failsafe-plugin.version}</version>
+                    <configuration>
+                        <testFailureIgnore>${ignoreAllFailures}</testFailureIgnore>
+                        <skip>${skipPostDeploymentTests}</skip>
+                        <groups>${postDeploymentTestGroups}</groups>
+                        <includes>
+                            <include>**/*IntegrationTest.java,**/*IntegratedTest.java,**/*IT.java</include>
+                        </includes>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>run-tests</id>
+                            <goals>
+                                <goal>integration-test</goal>
+                                <goal>verify</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+
                 <plugin>
                     <groupId>io.github.phillipuniverse</groupId>
                     <artifactId>githook-maven-plugin</artifactId>
