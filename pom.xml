@@ -53,6 +53,9 @@
         <github.organization>entando-k8s</github.organization>
         <preDeploymentTestGroups></preDeploymentTestGroups>
         <postDeploymentTestGroups></postDeploymentTestGroups>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <maven.javadoc.source>11</maven.javadoc.source>
         <skipLicenseDownload>false</skipLicenseDownload>
         <checkstyleConfigLocation>
             https://raw.githubusercontent.com/entando-k8s/${project.parent.artifactId}/v${project.parent.version}/checkstyle.xml
@@ -63,12 +66,12 @@
         <!--dependencies -->
         <resteasy.version>3.15.0.Final</resteasy.version>
         <keycloak.version>9.0.3</keycloak.version>
-        <quarkus.version>1.13.2.Final</quarkus.version>
+        <quarkus.version>1.13.7.Final</quarkus.version>
         <jackson.version>2.12.0</jackson.version>
         <okhttp.version>3.12.1</okhttp.version>
         <jcabi.version>1.1</jcabi.version>
         <commons-lang.version>3.9</commons-lang.version>
-        <fabric8.version>5.3.0</fabric8.version>
+        <fabric8.version>5.3.1</fabric8.version>
         <prometheus.metrics.version>0.6.0</prometheus.metrics.version>
         <guava.version>30.1-jre</guava.version>
         <snakeyaml.version>1.27</snakeyaml.version>
@@ -90,6 +93,9 @@
         <junit-platform-launcher.version>1.7.0</junit-platform-launcher.version>
         <commons-io.version>2.7</commons-io.version>
         <log4j.version>2.14.0</log4j.version>
+        <aspectj.version>1.9.6</aspectj.version>
+        <allure.version>2.14.0</allure.version>
+        <jacoco-maven-plugin.version>0.8.7</jacoco-maven-plugin.version>
     </properties>
     <issueManagement>
         <system>Github</system>
@@ -315,6 +321,18 @@
                 <scope>test</scope>
             </dependency>
             <dependency>
+                <groupId>io.qameta.allure</groupId>
+                <artifactId>allure-junit5</artifactId>
+                <version>${allure.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.dataformat</groupId>
+                <artifactId>jackson-dataformat-yaml</artifactId>
+                <version>${jackson.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
                 <groupId>org.awaitility</groupId>
                 <artifactId>awaitility</artifactId>
                 <version>${awaitility.version}</version>
@@ -326,7 +344,6 @@
                 <version>${jaway.jsonpath.version}</version>
                 <scope>test</scope>
             </dependency>
-
             <dependency>
                 <groupId>io.fabric8</groupId>
                 <artifactId>kubernetes-server-mock</artifactId>
@@ -374,19 +391,40 @@
                         <classpathDependencyExcludes>
                             <classpathDependencyExclude>org.jboss.slf4j:slf4j-jboss-logmanager</classpathDependencyExclude>
                         </classpathDependencyExcludes>
+                        <argLine>${argLine} -Dfile.encoding=UTF-8 -javaagent:"${settings.localRepository}/org/aspectj/aspectjweaver/${aspectj.version}/aspectjweaver-${aspectj.version}.jar"</argLine>
+                        <systemPropertyVariables>
+                            <allure.results.directory>${allure-maven.resultsDirectory}</allure.results.directory>
+                            <junit.jupiter.extensions.autodetection.enabled>true</junit.jupiter.extensions.autodetection.enabled>
+                            <junit.jupiter.execution.parallel.enabled>true</junit.jupiter.execution.parallel.enabled>
+                            <junit.jupiter.execution.parallel.config.strategy>dynamic</junit.jupiter.execution.parallel.config.strategy>
+                        </systemPropertyVariables>
                     </configuration>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.aspectj</groupId>
+                            <artifactId>aspectjweaver</artifactId>
+                            <version>${aspectj.version}</version>
+                        </dependency>
+                    </dependencies>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-failsafe-plugin</artifactId>
                     <version>${maven-failsafe-plugin.version}</version>
                     <configuration>
+                        <argLine>-Dfile.encoding=UTF-8 -javaagent:"${settings.localRepository}/org/aspectj/aspectjweaver/${aspectj.version}/aspectjweaver-${aspectj.version}.jar"</argLine>
                         <testFailureIgnore>${ignoreAllFailures}</testFailureIgnore>
                         <skip>${skipPostDeploymentTests}</skip>
                         <groups>${postDeploymentTestGroups}</groups>
                         <includes>
-                            <include>**/*IntegrationTest.java,**/*IntegratedTest.java,**/*IT.java</include>
+                            <include>**/*Test.java</include>
                         </includes>
+                        <systemPropertyVariables>
+                            <allure.results.directory>${allure-maven.resultsDirectory}</allure.results.directory>
+                            <junit.jupiter.extensions.autodetection.enabled>true</junit.jupiter.extensions.autodetection.enabled>
+                            <junit.jupiter.execution.parallel.enabled>true</junit.jupiter.execution.parallel.enabled>
+                            <junit.jupiter.execution.parallel.config.strategy>dynamic</junit.jupiter.execution.parallel.config.strategy>
+                        </systemPropertyVariables>
                     </configuration>
                     <executions>
                         <execution>
@@ -397,8 +435,72 @@
                             </goals>
                         </execution>
                     </executions>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.aspectj</groupId>
+                            <artifactId>aspectjweaver</artifactId>
+                            <version>${aspectj.version}</version>
+                        </dependency>
+                    </dependencies>
                 </plugin>
-
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>${jacoco-maven-plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <id>prepare-agent</id>
+                            <goals>
+                                <goal>prepare-agent</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <!--Bring it into core Maven build lifecycle for Sonar without needing the site phase-->
+                            <id>report</id>
+                            <goals>
+                                <goal>report</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>io.qameta.allure</groupId>
+                    <artifactId>allure-maven</artifactId>
+                    <version>2.10.0</version>
+                    <configuration>
+                        <reportVersion>${allure.version}</reportVersion>
+                        <resultsDirectory>${allure-maven.resultsDirectory}</resultsDirectory>
+                        <reportDirectory>${allure-maven.reportDirectory}</reportDirectory>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>report</goal>
+                            </goals>
+                            <phase>site</phase>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>${maven-javadoc-plugin.version}</version>
+                    <configuration>
+                        <skip>true</skip>
+                        <doclint>none</doclint>
+                        <source>11</source>
+                        <detectJavaApiLink>false</detectJavaApiLink>
+                        <quiet>true</quiet>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>attach-javadocs</id>
+                            <goals>
+                                <goal>jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
                 <plugin>
                     <groupId>io.github.phillipuniverse</groupId>
                     <artifactId>githook-maven-plugin</artifactId>
@@ -497,6 +599,94 @@ mvn clean verify -DpreDeploymentTestGroups=in-process -Ppre-deployment-verificat
     </build>
 
     <profiles>
+        <profile>
+            <!--
+            This profile is typically executed right in the beginning of the pipeline. For instance, this is the first
+            step that is executed to verify that the changes in the pull request comply to the coding standards in 
+            Checkstyle, have test sufficient coverage from unit tests and integration tests and don't have any
+            dependencies with known vulnerabilities. This profile is also responsible for static code analysis, but
+            this is done directly against Sonar Cloud and the outcome of that process generally doesn't affect the build.
+
+            Only tests that do NOT require the deployment artifact to have been deployed to Kubernetes should be
+            executed here. Any other checks that can be done without needing to deploy the artifact should be done here.
+            Keep in mind that the build environment should also guarantee that certain common services are available,
+            such as Kubernetes itself and Keycloak.
+
+             -->
+            <id>pre-deployment-verification</id>
+            <properties>
+                <skipPreDeploymentTests>false</skipPreDeploymentTests>
+                <allure-maven.resultsDirectory>${project.build.directory}/allure-results</allure-maven.resultsDirectory>
+                <allure-maven.reportDirectory>${project.build.directory}/site/allure-reports</allure-maven.reportDirectory>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.owasp</groupId>
+                        <artifactId>dependency-check-maven</artifactId>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                    </plugin>
+                    <plugin>
+                        <groupId>io.qameta.allure</groupId>
+                        <artifactId>allure-maven</artifactId>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-jar-plugin</artifactId>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-checkstyle-plugin</artifactId>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-project-info-reports-plugin</artifactId>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <!--
+            This profile is only executed once all Docker images have been built, and are ready for deployment
+            to Kubernetes. The assumption here is that there will be some form of inter-process communication with
+            the code that has been deployed to Kubernetes, exposed using Ingresses and/or Routes. Standard
+            connectivity with Kubernetes will be provided by means of the entando.default.routing.suffix
+            system property. No code coverage will be done here.
+            -->
+            <id>post-deployment-verification</id>
+            <properties>
+                <skipPostDeploymentTests>false</skipPostDeploymentTests>
+                <allure-maven.resultsDirectory>${project.build.directory}/allure-smoke-results</allure-maven.resultsDirectory>
+                <allure-maven.reportDirectory>${project.build.directory}/site/allure-smoke-reports</allure-maven.reportDirectory>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                    </plugin>
+                    <plugin>
+                        <groupId>io.qameta.allure</groupId>
+                        <artifactId>allure-maven</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
         <profile>
             <!--
             This profile executes the GraalVM compiler using Quarkus. The GraalVM build can be
