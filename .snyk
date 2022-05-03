@@ -20,3 +20,33 @@ ignore:
   SNYK-JAVA-ORGKEYCLOAK-1085642:
     - '*':
         reason: '.'
+  SNYK-JAVA-ORGKEYCLOAK-2434281:
+    - '*':
+        reason: '.'
+  SNYK-JAVA-ORGKEYCLOAK-2805802:
+    - '*':
+        reason: '.'
+  SNYK-JAVA-ORGPOSTGRESQL-2401816:
+    - '*':
+        reason: '.'
+  SNYK-JAVA-COMFASTERXMLJACKSONCORE-2421244:
+    - '*':
+        reason: '.'
+  SNYK-JAVA-ORGGRAALVMSDK-2767964:
+    - '*':
+        reason: '.'
+  SNYK-JAVA-ORGGRAALVMSDK-2769612:
+    - '*':
+        reason: '.'
+  SNYK-JAVA-ORGGRAALVMSDK-2769614:
+    - '*':
+        reason: '.'
+  SNYK-JAVA-ORGGRAALVMSDK-2769616:
+    - '*':
+        reason: '.'
+  SNYK-JAVA-ORGGRAALVMSDK-2769618:
+    - '*':
+        reason: '.'
+  SNYK-JAVA-ORGGRAALVMSDK-2769620:
+    - '*':
+        reason: '.'
