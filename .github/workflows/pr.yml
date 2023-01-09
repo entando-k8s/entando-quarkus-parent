@@ -40,8 +40,8 @@ jobs:
         run: |
           ${{ secrets.ENTANDO_OPT_PPL_INSTALL_CMD }}
           ~/ppl-run \
-            .. status-report \
             .. @checkout-branch --lcd "$LOCAL_CLONE_DIR" \
+            .. status-report \
             .. @setup-feature-flags "PR_PREFLIGHT_CHECKS" "BOM_CHECK" "BOM" \
             .. @setup-features-list "SCAN_MATRIX" --prefix "MTX-MVN-,MTX-SCAN-" \
           ;
@@ -59,7 +59,7 @@ jobs:
     needs: [ 'prepare' ]
     runs-on: ubuntu-latest
     env:
-      ENTANDO_BOT_TOKEN: ${{ secrets.ENTANDO_BOT_TOKEN }}
+      ENTANDO_BOT_TOKEN: "${{ secrets.ENTANDO_BOT_TOKEN }}"
       ENTANDO_OPT_OKD_LOGIN_TOKEN: "${{ secrets.ENTANDO_OPT_OKD_LOGIN_TOKEN }}"
     steps:
       #~ CHECKOUT
