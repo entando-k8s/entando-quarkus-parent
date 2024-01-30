@@ -5,12 +5,12 @@
     <parent>
         <groupId>org.entando</groupId>
         <artifactId>entando-maven-root</artifactId>
-        <version>7.2.0</version>
+        <version>7.3.1-ENG-5347-PR-22</version>
         <relativePath/>
     </parent>
     <groupId>org.entando</groupId>
     <artifactId>entando-quarkus-parent</artifactId>
-    <version>7.3.0</version>
+    <version>7.3.1</version>
     <packaging>pom</packaging>
 
     <name>Entando Quarkus Parent POM</name>
@@ -60,9 +60,9 @@
         <github.organization>entando-k8s</github.organization>
         <preDeploymentTestGroups></preDeploymentTestGroups>
         <postDeploymentTestGroups></postDeploymentTestGroups>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
-        <maven.javadoc.source>11</maven.javadoc.source>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <maven.javadoc.source>17</maven.javadoc.source>
         <skipLicenseDownload>false</skipLicenseDownload>
         <checkstyleConfigLocation>
             https://raw.githubusercontent.com/entando-k8s/entando-quarkus-parent/ACTIVE-CHECKSTYLE/checkstyle.xml
@@ -528,7 +528,7 @@
                     <configuration>
                         <skip>true</skip>
                         <doclint>none</doclint>
-                        <source>11</source>
+                        <source>17</source>
                         <detectJavaApiLink>false</detectJavaApiLink>
                         <quiet>true</quiet>
                     </configuration>
