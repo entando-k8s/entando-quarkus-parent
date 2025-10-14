@@ -630,9 +630,7 @@ mvn clean verify -DpreDeploymentTestGroups=in-process -Ppre-deployment-verificat
                         </execution>
                     </executions>
                     <configuration>
-                        <systemProperties>
-                            <quarkus.package.type>uber-jar</quarkus.package.type>
-                        </systemProperties>
+                        <uberJar>false</uberJar>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -824,9 +822,7 @@ mvn clean verify -DpreDeploymentTestGroups=in-process -Ppre-deployment-verificat
                                     <goal>build</goal>
                                 </goals>
                                 <configuration>
-                                    <systemProperties>
-                                        <quarkus.package.type>uber-jar</quarkus.package.type>
-                                    </systemProperties>
+                                    <uberJar>false</uberJar>
                                 </configuration>
                             </execution>
                         </executions>
