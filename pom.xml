@@ -303,6 +303,16 @@
                 <groupId>io.quarkus</groupId>
                 <artifactId>quarkus-kubernetes-client</artifactId>
                 <version>${quarkus.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.yaml</groupId>
+                        <artifactId>snakeyaml</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>io.smallrye.config</groupId>
+                        <artifactId>smallrye-config-source-yaml</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>io.quarkus</groupId>
@@ -452,7 +462,6 @@
                 <groupId>org.assertj</groupId>
                 <artifactId>assertj-core</artifactId>
                 <version>${assertj.version}</version>
-                <scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement> 
