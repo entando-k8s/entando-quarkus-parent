@@ -7,6 +7,9 @@ on:
 
 env:
   JDK_VERSION: '17'
+  MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
+  MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
+  MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
 
 jobs:
   ga-publish:
@@ -28,13 +31,6 @@ jobs:
           gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
           gpg-passphrase: MAVEN_GPG_PASSPHRASE
 
-      - name: Cache Maven packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
-
       - name: Extract version from tag
         run: |
           REF_VERSION=${GITHUB_REF_NAME#v}
@@ -45,14 +41,10 @@ jobs:
         run: mvn versions:set -DnewVersion=${{ env.VERSION }} -DgenerateBackupPoms=false
 
       - name: Publish to Maven Central
-        env:
-          MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
-          MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
         run: |
           mvn -B javadoc:jar source:jar source:test-jar deploy \
             -DskipTests=true \
-            -DaltDeploymentRepository="maven-central::default::${{ secrets.ENTANDO_OPT_MAVEN_REPO_GA }}" \
+            -DaltDeploymentRepository="maven-central::${{ vars.MAVEN_REPO_GA }}" \
             -P prepare-for-nexus \
             -DskipPreDeploymentTests=true \
             -DskipPostDeploymentTests=true \
