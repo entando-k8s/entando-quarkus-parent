@@ -8,19 +8,16 @@ if [[ -z "$NEXUS_URL" || -z "$NEXUS_REPO_ID" ]]; then
 fi
 
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-echo " PUBLISH TO NEXUS (via deploy-file)"
+echo " PUBLISH TO NEXUS"
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
-# Deploy POM to Nexus
-echo ">> Deploying POM artifact"
-mvn -B deploy:deploy-file \
-  -Durl="${NEXUS_URL}" \
-  -DrepositoryId="${NEXUS_REPO_ID}" \
-  -Dfile=pom.xml \
-  -DpomFile=pom.xml \
-  -Dpackaging=pom \
-  -DgeneratePom=false \
-  -DretryFailedDeploymentCount=3
+mvn -B javadoc:jar source:jar source:test-jar deploy \
+  -DskipTests=true \
+  -DaltDeploymentRepository="${NEXUS_REPO_ID}::${NEXUS_URL}" \
+  -Pprepare-for-nexus \
+  -DskipPreDeploymentTests=true \
+  -DskipPostDeploymentTests=true \
+  -Ddependency-check.skip=true
 
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 echo " PUBLISH COMPLETE"
