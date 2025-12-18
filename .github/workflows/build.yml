@@ -81,6 +81,9 @@ jobs:
     permissions:
       contents: read
 
+    env:
+      ARTIFACT_VERSION: ${{ needs.build.outputs.ARTIFACT_VERSION }}
+
     steps:
       - uses: actions/checkout@v4
 
@@ -107,12 +110,15 @@ jobs:
 
       - name: Publish to Nexus
         env:
-          # Secrets required for authentication (read by Maven settings or script)
           NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
           MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
-
-          # Variables required by the bash script
-          NEXUS_URL: ${{ vars.NEXUS_INSTANCE_URI }}
-          NEXUS_REPO_ID: ${{ vars.NEXUS_SERVER_ID }}
-        run: .github/publish-nexus.sh
+        run: |
+          mvn -B deploy javadoc:jar source:jar source:test-jar \
+            -DskipTests=true \
+            -DaltDeploymentRepository=${{ vars.NEXUS_SERVER_ID }}::default::${{ vars.NEXUS_INSTANCE_URI }} \
+            -Pprepare-for-nexus \
+            -DskipPreDeploymentTests=true \
+            -DskipPostDeploymentTests=true \
+            -Ddependency-check.skip=true \
+            -Dgpg.skip=true
